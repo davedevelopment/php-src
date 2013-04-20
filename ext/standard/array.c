@@ -4297,6 +4297,65 @@ PHP_FUNCTION(array_filter)
 }
 /* }}} */
 
+/* {{{ proto array array_find(array input [, mixed callback])
+   finds the first element of the array via the callback. */
+PHP_FUNCTION(array_find)
+{
+	zval *array;
+	zval **operand;
+	zval **args[1];
+	zval *retval = NULL;
+	zend_bool have_callback = 0;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fci_cache) == FAILURE) {
+		return;
+	}
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		have_callback = 1;
+		fci.no_separation = 0;
+		fci.retval_ptr_ptr = &retval;
+		fci.param_count = 1;
+	}
+
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&operand, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
+	) {
+		if (have_callback) {
+			args[0] = operand;
+			fci.params = args;
+
+			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
+				if (!zend_is_true(retval)) {
+					zval_ptr_dtor(&retval);
+					continue;
+				} else {
+					zval_ptr_dtor(&retval);
+				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the find callback");
+				return;
+			}
+		} else if (!zend_is_true(*operand)) {
+			continue;
+		}
+
+		zval_add_ref(operand);
+		RETURN_ZVAL(*operand, 1, 0);
+	}
+
+	RETURN_NULL();
+}
+/* }}} */
+
 /* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...])
    Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)

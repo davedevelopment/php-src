@@ -597,6 +597,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_filter, 0, 0, 1)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_find, 0, 0, 1)
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
 	ZEND_ARG_INFO(0, callback)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
@@ -3356,6 +3361,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_sum,														arginfo_array_sum)
 	PHP_FE(array_product,													arginfo_array_product)
 	PHP_FE(array_filter,													arginfo_array_filter)
+	PHP_FE(array_find,													    arginfo_array_find)
 	PHP_FE(array_map,														arginfo_array_map)
 	PHP_FE(array_chunk,														arginfo_array_chunk)
 	PHP_FE(array_combine,													arginfo_array_combine)
